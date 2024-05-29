@@ -103,7 +103,7 @@ class Task(object):
                                     'data': {
                                         'of': original_filename,
                                         'st': db_item.status,
-                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/MP/1.방송중', '/방송중'),
+                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/MP/1.방송중', '/ROOT/GDRIVE/VIDEO/방송중'),
                                         'r_file': db_item.result_filename,
                                         'meta': db_item.meta_find,
                                         'poster': entity.data['meta'].get('poster'),
