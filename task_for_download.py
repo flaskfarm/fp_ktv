@@ -93,6 +93,7 @@ class Task(object):
                                 data = res.json()
                                 P.logger.info(f"PLEX SCAN 요청 : {url} {data}")
                         
+                        # 2024-05-30 디스코드 봇. GDS용 incoming 파일처리. C1
                         if P.ModelSetting.get_bool("basic_is_gds_bot"):
                             if '/mnt/VOD1/MP/1.방송중' in db_item.result_folder:
                                 bot = {
@@ -102,7 +103,7 @@ class Task(object):
                                     'data': {
                                         'of': original_filename,
                                         'st': db_item.status,
-                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/MP', '/mnt/gds/VOD'),
+                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/MP/1.방송중', '/방송중'),
                                         'r_file': db_item.result_filename,
                                         'meta': db_item.meta_find,
                                         'poster': entity.data['meta'].get('poster'),
