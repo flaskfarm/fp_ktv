@@ -95,7 +95,7 @@ class Task(object):
                         
                         # 2024-05-30 디스코드 봇. GDS용 incoming 파일처리. C1
                         if P.ModelSetting.get_bool("basic_is_gds_bot"):
-                            if '/mnt/VOD1/MP/1.방송중' in db_item.result_folder:
+                            if '/mnt/VOD1/파일처리/방송중' in db_item.result_folder:
                                 bot = {
                                     't1': 'gds_tool',
                                     't2': 'fp',
@@ -103,7 +103,7 @@ class Task(object):
                                     'data': {
                                         'of': original_filename,
                                         'st': db_item.status,
-                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/MP/1.방송중', '/ROOT/GDRIVE/VIDEO/방송중'),
+                                        'r_fold': db_item.result_folder.replace('/mnt/VOD1/파일처리/방송중', '/ROOT/GDRIVE/VIDEO/방송중'),
                                         'r_file': db_item.result_filename,
                                         'meta': db_item.meta_find,
                                         'poster': entity.data['meta'].get('poster'),
@@ -240,6 +240,9 @@ class Task(object):
             tmps = tmps.split('/')
             program_folder = os.path.join(target_folder, *tmps)
             program_folder = Task.get_prefer_folder(config, entity, program_folder)
+
+            program_folder = Task.change_target_folder(config, program_folder)
+
             
             target_filename = entity.get_newfilename()
             if target_filename is not None:
@@ -303,4 +306,12 @@ class Task(object):
             folder_name = os.path.split(_dir)[-1]
             if folder_name.find(program_name) != -1:
                 return _dir
-         
+    
+
+    def change_target_folder(config, program_folder):
+        rules = config.get('타겟 폴더 변환 규칙')
+        if rules:
+            for rule in rules:
+                program_folder = program_folder.replace(rule['source'], rule['target'])
+        return program_folder
+

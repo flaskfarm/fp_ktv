@@ -45,3 +45,14 @@
   - data/db 폴더에 fileprocess_ktv_basic.yaml 파일과 fileprocess_ktv_simple.yaml 자동생성
   - 세부 설정을 원할 경우 파일의 주석부분을 확인하여 옵션 추가.
 
+<br>
+----
+## Changelog
+
+- 2024-06-01 : 타겟 폴더 변환 규칙 추가.
+  최종 폴더명을 가지고 replace
+```
+타겟 폴더 변환 규칙:
+  - source: "방송중/해외"
+    target: "제외/해외"
+```

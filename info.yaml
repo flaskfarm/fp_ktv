@@ -1,5 +1,5 @@
 title: "국내TV 파일처리"
-version: "1.1.0"
+version: "1.1.1"
 package_name: "fp_ktv"
 developer: "flaskfarm"
 description: "국내TV 영상 파일 전용 파일처리"
