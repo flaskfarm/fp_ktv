@@ -310,6 +310,11 @@ class Task(object):
 
     def change_target_folder(config, program_folder):
         rules = config.get('타겟 폴더 변환 규칙')
+        rules_except = config.get('타겟 폴더 변환 규칙 예외', [])
+        for rule in rules_except:
+            if rule in program_folder:
+                return program_folder
+
         if rules:
             for rule in rules:
                 program_folder = program_folder.replace(rule['source'], rule['target'])
