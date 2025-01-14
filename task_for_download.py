@@ -5,10 +5,11 @@ import traceback
 
 import requests
 from support import SupportDiscord, SupportFile
-from tool import EntityKtv, ToolNotify
+from tool import ToolNotify
 
 from .model import ModelFPKtvItem
 from .setup import F, P
+from .fp_entity_ktv import EntityKtv
 
 
 class Task(object):
