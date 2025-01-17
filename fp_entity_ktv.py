@@ -2,7 +2,7 @@
 import re
 import time
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from support import SupportFile, SupportString
 
@@ -192,7 +192,10 @@ class EntityKtv(object):
         # 방송일에 맞는 에피 번호 찾기
         #logger.warning(f"에피소드 목록")
 
-        for epi_no, value in self.data['meta']['info']['extra_info']['episodes'].items():
+        episodes = self.data['meta']['info']['extra_info']['episodes']
+        file_date = datetime.strptime(self.data['filename']['date'], '%y%m%d')
+        for epi_no in sorted(episodes.keys(), reverse=True):
+            value = episodes[epi_no]
             if 'daum' in value:
                 site_info = value['daum']
                 tmp2 = site_info['premiered']
@@ -205,6 +208,9 @@ class EntityKtv(object):
                     ret = SiteDaumTv.episode_info(site_info['code'])
                     if ret['ret'] == 'success':
                         tmp2 = ret['data']['premiered']
+                        info_date = datetime.strptime(tmp2, '%Y-%m-%d')
+                        if info_date < file_date - timedelta(days=7):
+                            return
                 if self.data['filename']['date'] == tmp2.replace('-', '')[2:]:
                     self.data['process_info']['status'] = 'number_and_date_match'
                     self.data['process_info']['rebuild'] += 'change_epi_number'
