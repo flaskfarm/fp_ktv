@@ -214,7 +214,7 @@ class EntityKtv(object):
         # 요청 실패 횟수 제한
         failed_to_fetch_limit = 5
         # 최대 요청 횟수 제한
-        total_fetch_limit = 30
+        total_fetch_limit = 100
         logger.info(f'Search order: {orders[:min(20, len(orders))]} ...')
         tried = []
         for epi_no in orders:
