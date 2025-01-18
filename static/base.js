@@ -8,12 +8,12 @@ function color(text, color='red') {
   return '<span style="color:'+color+'; font-weight:bold">' + text + '</span>';
 }
 
-$("body").on('click', '#dry_run_start_btn', function(e){
+$('#dry_run_start_btn').on('click', function(e){
   e.preventDefault();
   globalSendCommand('dry_run_start');
 });
   
-$("body").on('click', '#dry_run_stop_btn', function(e){
+$('#dry_run_stop_btn').on('click', function(e){
   e.preventDefault();
   globalSendCommand('dry_run_stop');
 });
