@@ -228,7 +228,11 @@ class EntityKtv(object):
                 방송일을 가져오려면 에피소드 정보 페이지에 한번 접속해야 함.
                 '''
                 if not tmp2 or tmp2 == 'unknown':
-                    ret = SiteDaumTv.episode_info(site_info['code'])
+                    try:
+                        ret = SiteDaumTv.episode_info(site_info['code'])
+                    except Exception as e:
+                        logger.error(str(e))
+                        continue
                     total_fetch_limit -= 1
                     if ret['ret'] == 'success':
                         tmp2 = ret.get('data', {}).get('premiered', '1900-01-01')
