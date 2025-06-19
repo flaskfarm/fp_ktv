@@ -183,7 +183,7 @@ class EntityKtv(object):
                         self.data['process_info']['episode']['no'] = self.data['filename']['no']
                         return
 
-        # 맞는 에피소드 몾찾음
+        # 맞는 에피소드 못 발견
         if len(self.data['meta']['info']['extra_info']['episodes']) == 0:
             # 메타검색은 했지만 에피소드 목록이 없음.
             self.data['process_info']['status'] = 'meta_epi_empty'
@@ -191,70 +191,70 @@ class EntityKtv(object):
 
         # 방송일에 맞는 에피 번호 찾기
         #logger.warning(f"에피소드 목록")
-
-        episodes = self.data['meta']['info']['extra_info']['episodes']
-        episode_indexes = {int(no) for no in episodes.keys()}
-        # 최근 회차를 먼저 비교
-        orders = sorted(episode_indexes, reverse=True)[:min(15, len(episode_indexes))]
-        episode_indexes = episode_indexes - set(orders)
-        # 파일 회차를 기준으로 search_step에 따라 증감
-        search_step = 3
-        should_add = True
-        cursor = int(self.data['filename']['no'])
-        cycle = 1
-        while len(episode_indexes) > 0:
-            for _ in range(1, search_step + 1):
-                if cursor in episode_indexes:
-                    orders.append(cursor)
-                    episode_indexes.remove(cursor)
-                cursor = cursor + 1 if should_add else cursor - 1
-            should_add = not(should_add)
-            cursor = cursor + search_step * cycle + 1 if should_add else cursor - search_step * cycle - 1
-            cycle += 1
-        # 요청 실패 횟수 제한
-        failed_to_fetch_limit = 5
-        # 최대 요청 횟수 제한
-        total_fetch_limit = 100
-        logger.info(f'Search order: {orders[:min(20, len(orders))]} ...')
-        tried = []
-        for epi_no in orders:
-            value = episodes[epi_no]
-            if 'daum' in value:
-                site_info = value['daum']
-                tmp2 = site_info['premiered']
-                '''
-                2024-01-14 halfaider
-                Daum TV 정보 페이지가 개편되면서 프로그램 정보 페이지에서 모든 에피소드 번호와 방송일을 가져올 수 없음.
-                방송일을 가져오려면 에피소드 정보 페이지에 한번 접속해야 함.
-                '''
-                if not tmp2 or tmp2 == 'unknown':
-                    try:
-                        ret = SiteDaumTv.episode_info(site_info['code'])
-                    except Exception as e:
-                        logger.error(str(e))
-                        continue
-                    total_fetch_limit -= 1
-                    if ret['ret'] == 'success':
-                        tmp2 = ret.get('data', {}).get('premiered', '1900-01-01')
-                    else:
-                        failed_to_fetch_limit -= 1
-                if self.data['filename']['date'] == tmp2.replace('-', '')[2:]:
-                    self.data['process_info']['status'] = 'number_and_date_match'
-                    self.data['process_info']['rebuild'] += 'change_epi_number'
-                    self.data['process_info']['change_epi_number'] = epi_no
-                    self.data['process_info']['episode'] = value['daum']
-                    self.data['process_info']['episode']['no'] = epi_no
+        if (file_epi_no := self.data['filename']['no']) > 0:
+            episodes = self.data['meta']['info']['extra_info']['episodes']
+            episode_indexes = {int(no) for no in episodes.keys()}
+            # 최근 회차를 먼저 비교
+            orders = sorted(episode_indexes, reverse=True)[:min(15, len(episode_indexes))]
+            episode_indexes = episode_indexes - set(orders)
+            # 파일 회차를 기준으로 search_step에 따라 증감
+            search_step = 3
+            should_add = True
+            cursor = int(self.data['filename']['no'])
+            cycle = 1
+            while len(episode_indexes) > 0:
+                for _ in range(1, search_step + 1):
+                    if cursor in episode_indexes:
+                        orders.append(cursor)
+                        episode_indexes.remove(cursor)
+                    cursor = cursor + 1 if should_add else cursor - 1
+                should_add = not(should_add)
+                cursor = cursor + search_step * cycle + 1 if should_add else cursor - search_step * cycle - 1
+                cycle += 1
+            # 요청 실패 횟수 제한
+            failed_to_fetch_limit = 5
+            # 최대 요청 횟수 제한
+            total_fetch_limit = 100
+            logger.info(f'Search order: {orders[:min(20, len(orders))]} ...')
+            tried = []
+            for epi_no in orders:
+                value = episodes[epi_no]
+                if 'daum' in value:
+                    site_info = value['daum']
+                    tmp2 = site_info['premiered']
+                    '''
+                    2024-01-14 halfaider
+                    Daum TV 정보 페이지가 개편되면서 프로그램 정보 페이지에서 모든 에피소드 번호와 방송일을 가져올 수 없음.
+                    방송일을 가져오려면 에피소드 정보 페이지에 한번 접속해야 함.
+                    '''
+                    if not tmp2 or tmp2 == 'unknown':
+                        try:
+                            ret = SiteDaumTv.episode_info(site_info['code'])
+                        except Exception as e:
+                            logger.error(str(e))
+                            continue
+                        total_fetch_limit -= 1
+                        if ret['ret'] == 'success':
+                            tmp2 = ret.get('data', {}).get('premiered', '1900-01-01')
+                        else:
+                            failed_to_fetch_limit -= 1
+                    if self.data['filename']['date'] == tmp2.replace('-', '')[2:]:
+                        self.data['process_info']['status'] = 'number_and_date_match'
+                        self.data['process_info']['rebuild'] += 'change_epi_number'
+                        self.data['process_info']['change_epi_number'] = epi_no
+                        self.data['process_info']['episode'] = value['daum']
+                        self.data['process_info']['episode']['no'] = epi_no
+                        return
+                tried.append(epi_no)
+                # 회차 정보 페이지에서 계속 정보를 가져오지 못 하는 경우 종료
+                if failed_to_fetch_limit < 0:
+                    logger.warning('Too many fails to fetch the data...')
                     return
-            tried.append(epi_no)
-            # 회차 정보 페이지에서 계속 정보를 가져오지 못 하는 경우 종료
-            if failed_to_fetch_limit < 0:
-                logger.warning('Too many fails to fetch the data...')
-                return
-            if total_fetch_limit < 0:
-                logger.warning(f'Too many requests to fetch the data: {tried}')
-                return
+                if total_fetch_limit < 0:
+                    logger.warning(f'Too many requests to fetch the data: {tried}')
+                    return
 
-        # 다음에서 몾찾았지만 티빙 웨이브에 있다면 그대로 유지해야함.
+        # 다음에서 못 찾았지만 티빙 웨이브에 있다면 그대로 유지해야함.
         # 굳이 찾을 필요없이 릴리즈로 맞다고 넘김
         # 근데 받을때는 에피번호가 없고 나중에 메타가 생기는 경우가 잇는 것 같음
         if self.data['filename']['no'] != -1:
