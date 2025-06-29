@@ -2,7 +2,7 @@
 import re
 import time
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from support import SupportFile, SupportString
 
