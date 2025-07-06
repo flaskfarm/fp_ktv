@@ -95,7 +95,9 @@ class Task(object):
                                 P.logger.info(f"PLEX SCAN 요청 : {url} {data}")
                         
                         # 2024-05-30 디스코드 봇. GDS용 incoming 파일처리. C1
-                        if P.ModelSetting.get_bool("basic_is_gds_bot"):
+                        # 2025-07-06 yaml로 변경
+                        #if P.ModelSetting.get_bool("basic_is_gds_bot"):
+                        if config.get('GDS용파일처리', {}).get('USE', False):
                             if '/mnt/VOD1/파일처리/방송중' in db_item.result_folder:
                                 bot = {
                                     't1': 'gds_tool',
@@ -110,7 +112,7 @@ class Task(object):
                                         'poster': entity.data['meta'].get('poster'),
                                     }
                                 }
-                                SupportDiscord.send_discord_bot_message(json.dumps(bot), "https://discord.com/api/webhooks/1043387235891949599/A4N2PHfKwA6n-5wXfWdPyoSQPXT6wpj1HEmAMEam6v1JnFxd-PyHt-J7pOEkBEMu0Ld1")
+                                SupportDiscord.send_discord_bot_message(json.dumps(bot), config.get('GDS용파일처리', {}).get('WEBHOOK_URL'))
                         
                         if P.ModelSetting.get_bool("basic_use_notify"):
                             msg = f"파일: {original_filename}\n최종폴더: {db_item.result_folder}\n최종파일: {db_item.result_filename}"
