@@ -249,6 +249,12 @@ class Task(object):
             
             target_filename = entity.get_newfilename()
             if target_filename is not None:
+                if config.get('4K폴더생성', False) and '2160p' in target_filename:
+                    tmp = 'Season 101 시즌 1 4K'
+                    match = re.search(r'\.S(?P<no>\d+)E\d+\.', target_filename, re.IGNORECASE)
+                    if match:
+                        tmp = f"Season {match.group('no')} 시즌 {int(match.group('no'))%100} 4K"
+                    program_folder = os.path.join(program_folder, tmp)
                 db_item.result_folder = program_folder
                 db_item.result_filename = target_filename
                 db_item.status = "MOVE_BY_META"
